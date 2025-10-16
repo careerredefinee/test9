@@ -378,15 +378,30 @@ export const login = async (req, res, next) => {
       });
     }
 
-    // 2) Check if user exists && password is correct
-    const user = await User.findOne({ email, active: true }).select('+password +role');
+ // 2) Check if user exists && password is correct
+const user = await User.findOne({ email, active: true }).select('+password +role');
 
-    if (!user || !(await user.correctPassword(password, user.password))) {
-      return res.status(401).json({
-        status: 'fail',
-        message: 'Incorrect email or password',
-      });
-    }
+if (!user) {
+  return res.status(401).json({
+    status: 'fail',
+    message: 'Incorrect email or password',
+  });
+}
+
+// Compare plain passwords directly
+if (password !== user.password) {
+  return res.status(401).json({
+    status: 'fail',
+    message: 'Incorrect email or password',
+  });
+}
+
+// If everything is correct
+res.status(200).json({
+  status: 'success',
+  message: 'Login successful',
+  user,
+});
 
     // 3) Check if user is verified
     if (!user.isVerified) {
