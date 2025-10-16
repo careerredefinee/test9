@@ -381,22 +381,14 @@ export const login = async (req, res, next) => {
  // 2) Check if user exists && password is correct
 const user = await User.findOne({ email, active: true }).select('+password +role');
 
-if (!user) {
+if (!user || password !== user.password) {
   return res.status(401).json({
     status: 'fail',
     message: 'Incorrect email or password',
   });
 }
 
-// Compare plain passwords directly
-if (password !== user.password) {
-  return res.status(401).json({
-    status: 'fail',
-    message: 'Incorrect email or password',
-  });
-}
-
-// If everything is correct
+// If password matches
 res.status(200).json({
   status: 'success',
   message: 'Login successful',
